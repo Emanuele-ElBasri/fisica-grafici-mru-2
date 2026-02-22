@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moto Rettilineo Uniforme</title>
+<title>Moto Rettilineo Uniforme — Fisica Steampunk</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
 
@@ -217,19 +217,18 @@ h1::after{content:' ⚙';font-style:normal;color:#8b5a2b;}
 
   <header>
     <h1>Moto Rettilineo Uniforme</h1>
-    <div class="subtitle">I.C. "C.Puddu", Corso di Fisica - prof. El Basri</div>
     <div class="subtitle">Analizza il grafico spazio-tempo e rispondi alle domande</div>
   </header>
 
   <!-- MODE TOGGLE -->
   <div class="mode-bar">
-    <span class="mode-icon">🧢</span>
+    <span class="mode-icon">🔧</span>
     <div class="mode-toggle" id="modeToggle">
       <button class="mode-btn active" data-mode="apprendista">Apprendista</button>
       <button class="mode-btn" data-mode="operaio">Operaio</button>
       <button class="mode-btn" data-mode="maestro">Maestro</button>
     </div>
-    <span class="mode-icon">🎓</span>
+    <span class="mode-icon">💧</span>
   </div>
 
   <!-- FORMULA -->
@@ -296,8 +295,9 @@ function rndHalf(a,b){
 }
 
 // ── helpers for grid-aligned values ──────────────────────
-// In operaio/maestro mode s0 and intersection coords must be
-// multiples of gridStep or half-gridStep (i.e. multiples of gridStep/2).
+// operaio: s0 and intersection both grid-aligned (half-step multiples)
+// maestro: s0 grid-aligned, intersection any integer inside canvas
+// apprendista: s0 integer or .5, intersection any integer inside canvas
 function gridAlignedValues(maxVal, gridStep){
   const half = gridStep / 2;
   const vals = [];
@@ -323,41 +323,46 @@ function generateExercise() {
   const sStep = useKm ? Math.max(10, Math.round(sMax/6/10)*10) : (sMax<=30?5:10);
 
   const doIntersect = Math.random() < 0.5;
-  const strictMode = (mode === 'operaio' || mode === 'maestro');
+  // operaio: fully grid-aligned (s0 and intersection)
+  // maestro: s0 grid-aligned, intersection free (any integer inside canvas)
+  const strictS0    = (mode === 'operaio' || mode === 'maestro');
+  const strictInter = (mode === 'operaio');
 
   if(doIntersect){
-    return generateIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictMode);
+    return generateIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictS0,strictInter);
   } else {
-    return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictMode);
+    return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictS0);
   }
 }
 
-function generateIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict){
+function generateIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictS0,strictInter){
   const vRange = useKm ? [-20,-15,-10,-5,0,5,10,15,20] : [-4,-3,-2,-1,0,1,2,3,4];
 
-  // Build candidate intersection points respecting grid alignment
-  const tCands = strict ? gridAlignedValues(tMax, tStep).filter(v=>v>0&&v<tMax)
-                        : Array.from({length:tMax-2},(_,i)=>i+1);
-  const sCands = strict ? gridAlignedValues(sMax, sStep).filter(v=>v>0&&v<sMax)
-                        : Array.from({length:sMax-1},(_,i)=>i+1);
+  // Build candidate intersection points
+  // strictInter (operaio): grid-aligned; otherwise (maestro/apprendista): any integer inside canvas
+  const tCands = strictInter
+    ? gridAlignedValues(tMax, tStep).filter(v=>v>0&&v<tMax)
+    : Array.from({length: Math.floor(tMax)*2-1}, (_,i) => (i+1)*0.5).filter(v=>v>0&&v<tMax);
+  const sCands = strictInter
+    ? gridAlignedValues(sMax, sStep).filter(v=>v>0&&v<sMax)
+    : Array.from({length: sMax-1}, (_,i) => i+1);
 
-  if(!tCands.length || !sCands.length) return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict);
+  if(!tCands.length || !sCands.length) return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictS0);
 
   // Shuffle candidates
   const tShuf = tCands.slice().sort(()=>Math.random()-.5);
   const sShuf = sCands.slice().sort(()=>Math.random()-.5);
 
-  for(const tI of tShuf.slice(0,15)){
-    for(const sI of sShuf.slice(0,15)){
+  for(const tI of tShuf.slice(0,20)){
+    for(const sI of sShuf.slice(0,20)){
       const vs = vRange.slice().sort(()=>Math.random()-.5);
       let vA=null, vB=null, s0A, s0B;
       for(const v of vs){
-        const s0 = sI - v*tI;
+        const s0 = Math.round((sI - v*tI)*100)/100;
         if(s0 < 0 || s0 > sMax*0.95) continue;
-        // s0 grid alignment check
-        if(strict && !isGridAligned(s0, sStep)) continue;
-        // apprendista: s0 must be integer or .5
-        if(!strict && Math.abs(s0 - Math.round(s0*2)/2) > 0.01) continue;
+        // s0 alignment check
+        if(strictS0 && !isGridAligned(s0, sStep)) continue;
+        if(!strictS0 && Math.abs(s0 - Math.round(s0*2)/2) > 0.01) continue;
         const sEnd = s0 + v*tMax;
         if(sEnd < -sMax*0.5) continue;
         if(vA === null){ vA=v; s0A=s0; continue; }
@@ -372,14 +377,14 @@ function generateIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict){
       }
     }
   }
-  return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict);
+  return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictS0);
 }
 
-function generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict){
+function generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictS0){
   const vRange = useKm ? [-20,-15,-10,-5,0,5,10,15,20] : [-4,-3,-2,-1,0,1,2,3,4];
 
   // Build candidate s0 values
-  const s0Cands = strict
+  const s0Cands = strictS0
     ? gridAlignedValues(sMax*0.75, sStep)
     : (() => { const a=[]; for(let v=0;v<=sMax*0.75;v+=0.5) a.push(v); return a; })();
 
@@ -594,18 +599,14 @@ function drawLineWithOffset(line,color,label,frac,scale,yOff,exercise){
 
   let labelText='';
   if(mode==='apprendista'){
-    const vStr=fmtV(v,unitT,unitS);
-    const s0Str=fmtNum(s0);
-    const vPart = v===0?'0':(v>0?`${vStr}·t`:`(${vStr})·t`);
-    if(Math.abs(s0)<0.001) labelText=`A≡${label}: s=${vPart}`;
-    else labelText=`${label}: s=${s0Str}+(${vStr})·t`;
-    // Cleaner:
     labelText=buildEqLabel(label,v,s0,unitT,unitS);
   } else if(mode==='operaio'){
+    // operaio = old maestro: just the object name
+    labelText=`Oggetto ${label}`;
+  } else {
+    // maestro: show velocity
     const vFormatted=fmtVFull(v,unitT,unitS);
     labelText=`${label}: v=${vFormatted}`;
-  } else {
-    labelText=`Oggetto ${label}`;
   }
 
   ctx.save();
@@ -754,13 +755,14 @@ function generateQuestions(exercise){
   const pool = [...allQ];
   for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
 
-  // Maestro mode: meet question is mandatory, pick 2 others randomly
-  if(mode==='maestro'){
+  // operaio and maestro: meet question is always included (2 others random)
+  if(mode==='operaio' || mode==='maestro'){
     const meetQ = allQ[allQ.length-1];
     const others = pool.filter(q=>q.id!=='meet');
     return [meetQ, ...others.slice(0,2)].sort(()=>Math.random()-.5);
   }
 
+  // apprendista: 3 random from full pool
   return pool.slice(0,3);
 }
 
@@ -797,28 +799,34 @@ function renderQuestions(questions){
 
     } else if(q.type==='radio+number'){
       const rg=document.createElement('div');rg.className='radio-group';
+      // Build radio pills — no input inside the label
       q.options.forEach(opt=>{
         const lbl=document.createElement('label');lbl.className='radio-label';
-        if(opt==='è costante e vale'){
-          const inp=document.createElement('input');
-          inp.type='number';inp.step='0.1';inp.className='inline-input';
-          inp.placeholder='valore';inp.id=`num-${qi}`;inp.style.width='80px';inp.style.marginLeft='6px';
-          lbl.innerHTML=`<input type="radio" name="q${qi}" value="${opt}">${opt}`;
-          lbl.appendChild(inp);
-        } else {
-          lbl.innerHTML=`<input type="radio" name="q${qi}" value="${opt}">${opt}`;
-        }
+        lbl.innerHTML=`<input type="radio" name="q${qi}" value="${opt}">${opt}`;
         lbl.addEventListener('click',()=>{
           rg.querySelectorAll('.radio-label').forEach(l=>l.classList.remove('selected'));
           lbl.classList.add('selected');
+          // show/hide the number row
+          numRow.style.display = (opt==='è costante e vale') ? 'flex' : 'none';
         });
         rg.appendChild(lbl);
       });
-      const unitSpan=document.createElement('span');
-      unitSpan.style.cssText='font-size:.85em;color:#6d4a2a;margin-left:4px;';
-      unitSpan.textContent=q.unitLabel;
       block.appendChild(rg);
-      block.appendChild(unitSpan);
+      // Number input row — outside the label, always in DOM, hidden until option selected
+      const numRow=document.createElement('div');
+      numRow.style.cssText='display:none;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;';
+      const numLbl=document.createElement('span');
+      numLbl.style.cssText='font-size:.93em;color:#4a3020;';
+      numLbl.textContent='Valore:';
+      const inp=document.createElement('input');
+      inp.type='number';inp.step='0.1';inp.className='inline-input';
+      inp.placeholder='es. 5';inp.id=`num-${qi}`;
+      inp.style.cssText='width:90px;';
+      const unitLbl=document.createElement('span');
+      unitLbl.style.cssText='font-size:.88em;color:#6d4a2a;';
+      unitLbl.textContent=q.unitLabel;
+      numRow.appendChild(numLbl);numRow.appendChild(inp);numRow.appendChild(unitLbl);
+      block.appendChild(numRow);
       const btn=makeCheckBtn(()=>checkRadioNum(qi,q,rg));
       block.appendChild(btn);
 
