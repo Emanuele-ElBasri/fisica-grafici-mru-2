@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Moto Rettilineo Uniforme</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+  font-family:'Courier Prime','Courier New',monospace;
+  background:
+    radial-gradient(circle at 15% 20%,rgba(101,67,33,.15) 0%,transparent 40%),
+    radial-gradient(circle at 85% 80%,rgba(101,67,33,.12) 0%,transparent 40%),
+    linear-gradient(135deg,#f4e4c1 0%,#e8d4b0 25%,#d9bc8c 50%,#e8d4b0 75%,#f4e4c1 100%);
+  min-height:100vh;padding:20px;position:relative;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;top:0;left:0;right:0;bottom:0;
+  background-image:
+    repeating-linear-gradient(0deg,transparent,transparent 1px,rgba(101,67,33,.03) 1px,rgba(101,67,33,.03) 2px),
+    repeating-linear-gradient(90deg,transparent,transparent 1px,rgba(101,67,33,.02) 1px,rgba(101,67,33,.02) 2px);
+  pointer-events:none;z-index:0;
+}
+
+.gear{position:fixed;color:rgba(139,90,43,.13);font-size:120px;animation:rotate 20s linear infinite;pointer-events:none;z-index:0;}
+.gear1{top:5%;left:3%;animation-duration:25s;}
+.gear2{top:60%;right:5%;font-size:150px;animation-duration:30s;animation-direction:reverse;}
+.gear3{bottom:10%;left:8%;font-size:90px;animation-duration:20s;animation-direction:reverse;}
+.gear4{top:30%;right:15%;font-size:70px;animation-duration:18s;}
+@keyframes rotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+.container{
+  max-width:960px;margin:20px auto;
+  background:linear-gradient(135deg,rgba(232,212,176,.96) 0%,rgba(217,188,140,.96) 100%);
+  border:6px solid #8b5a2b;
+  box-shadow:0 0 0 2px #654321,0 0 0 4px #8b5a2b,0 20px 50px rgba(0,0,0,.4),inset 0 0 80px rgba(139,90,43,.07);
+  padding:40px 35px 30px;position:relative;z-index:1;
+}
+.rivet{position:absolute;width:16px;height:16px;background:radial-gradient(circle,#8b6914 0%,#5d4610 100%);border-radius:50%;border:2px solid #654321;box-shadow:inset 0 1px 2px rgba(0,0,0,.6),0 2px 4px rgba(0,0,0,.3);}
+.rivet-tl{top:25px;left:25px}.rivet-tr{top:25px;right:25px}.rivet-bl{bottom:25px;left:25px}.rivet-br{bottom:25px;right:25px}
+.metal-strip{position:absolute;background:linear-gradient(90deg,#8b6914 0%,#b8860b 50%,#8b6914 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -1px 0 rgba(0,0,0,.5);}
+.metal-strip-top{top:0;left:0;right:0;height:6px}
+.metal-strip-bottom{bottom:0;left:0;right:0;height:6px}
+
+header{text-align:center;margin-bottom:22px;padding-bottom:18px;border-bottom:4px solid #8b5a2b;}
+h1{font-family:'IM Fell English',serif;font-size:2.1em;color:#4a3020;font-style:italic;letter-spacing:2px;text-shadow:2px 2px 4px rgba(0,0,0,.2);}
+h1::before{content:'⚙ ';font-style:normal;color:#8b5a2b;}
+h1::after{content:' ⚙';font-style:normal;color:#8b5a2b;}
+.subtitle{font-size:1em;color:#6d4a2a;font-style:italic;margin-top:6px;}
+
+/* ── TOGGLE MODE ── */
+.mode-bar{display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:22px;}
+.mode-toggle{
+  display:flex;
+  background:linear-gradient(135deg,#4a3020 0%,#654321 100%);
+  border:3px solid #8b5a2b;border-radius:30px;
+  box-shadow:0 4px 12px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.1);
+  padding:4px;gap:0;
+  position:relative;
+}
+.mode-btn{
+  font-family:'Special Elite',monospace;font-size:.9em;
+  padding:7px 22px;border:none;border-radius:24px;cursor:pointer;
+  background:transparent;color:rgba(244,228,193,.6);
+  transition:all .25s;letter-spacing:.5px;
+  position:relative;z-index:1;
+}
+.mode-btn.active{
+  background:linear-gradient(135deg,#b8860b 0%,#d4a520 50%,#b8860b 100%);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.25);
+}
+.mode-btn:hover:not(.active){color:#f4e4c1;}
+.mode-icon{font-size:1.1em;color:#8b5a2b;}
+
+/* ── FORMULA ── */
+.formula{
+  background:rgba(139,90,43,.13);border:2px solid #8b5a2b;border-radius:6px;
+  padding:10px 18px;margin-bottom:18px;text-align:center;
+  font-family:'Courier Prime',monospace;font-size:1.25em;color:#4a3020;font-weight:bold;
+}
+
+/* ── CANVAS SECTION ── */
+.canvas-section{
+  background:linear-gradient(135deg,rgba(255,248,230,.65) 0%,rgba(245,235,210,.65) 100%);
+  border:4px solid #8b5a2b;border-radius:8px;padding:12px;
+  box-shadow:inset 0 2px 10px rgba(0,0,0,.1),0 4px 15px rgba(0,0,0,.18);
+  margin-bottom:20px;position:relative;
+}
+#graphCanvas{display:block;width:100%;border:2px solid #a0774a;border-radius:4px;cursor:crosshair;}
+
+/* tooltip */
+#tooltip{
+  position:fixed;background:rgba(74,48,32,.93);color:#f4e4c1;
+  padding:5px 11px;border-radius:4px;font-size:.82em;border:1px solid #8b5a2b;
+  pointer-events:none;display:none;z-index:200;font-family:'Courier Prime',monospace;
+}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:24px;justify-content:center;margin-top:8px;}
+.legend-item{display:flex;align-items:center;gap:8px;font-weight:bold;color:#4a3020;font-size:.9em;}
+.legend-line{width:36px;height:3px;border-radius:2px;}
+
+/* ── QUESTIONS ── */
+.questions-section{
+  background:linear-gradient(135deg,rgba(255,248,230,.6) 0%,rgba(245,235,210,.6) 100%);
+  border:4px solid #8b5a2b;border-radius:8px;padding:20px;
+  box-shadow:inset 0 2px 8px rgba(0,0,0,.08);margin-bottom:18px;
+}
+.questions-section h3{
+  font-family:'IM Fell English',serif;color:#4a3020;font-size:1.25em;
+  border-bottom:2px solid #8b5a2b;padding-bottom:8px;margin-bottom:16px;
+}
+
+.question-block{
+  background:rgba(139,90,43,.08);border:2px solid #a0774a;border-radius:6px;
+  padding:14px 16px;margin-bottom:14px;
+}
+.question-text{color:#4a3020;font-size:.97em;margin-bottom:10px;font-weight:bold;}
+
+/* radio groups */
+.radio-group{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+.radio-label{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border:2px solid #8b5a2b;border-radius:20px;
+  background:linear-gradient(135deg,#e8d4b0,#d9bc8c);
+  cursor:pointer;font-size:.9em;color:#4a3020;
+  transition:all .2s;user-select:none;
+}
+.radio-label:hover{background:linear-gradient(135deg,#f0e0c0,#e8d4b0);}
+.radio-label input{display:none;}
+.radio-label.selected{
+  background:linear-gradient(135deg,#8b6914,#b8860b);
+  color:#fff;border-color:#654321;
+}
+.radio-label.correct{background:linear-gradient(135deg,#4caf50,#45a049);color:#fff;border-color:#2e7d32;}
+.radio-label.incorrect{background:linear-gradient(135deg,#f44336,#e53935);color:#fff;border-color:#c62828;}
+
+/* inline number input */
+.inline-input{
+  font-family:'Courier Prime',monospace;font-size:1em;
+  padding:5px 10px;border:2px solid #8b5a2b;border-radius:4px;
+  background:rgba(255,255,255,.85);color:#4a3020;width:90px;outline:none;
+  transition:border-color .2s;
+}
+.inline-input:focus{border-color:#d4a520;box-shadow:0 0 5px rgba(184,134,11,.4);}
+.inline-input.correct{border-color:#4caf50;background:rgba(76,175,80,.15);}
+.inline-input.incorrect{border-color:#f44336;background:rgba(244,67,54,.1);}
+
+/* intersection sub-question */
+.sub-question{
+  margin-top:10px;padding:10px 14px;
+  background:rgba(255,248,230,.7);border:1px solid #a0774a;border-radius:5px;
+  display:none;
+}
+.sub-question.visible{display:block;}
+.sub-q-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.sub-q-row label{font-size:.9em;color:#4a3020;}
+
+/* feedback */
+.q-feedback{font-size:.88em;margin-top:7px;font-style:italic;min-height:18px;}
+.q-feedback.ok{color:#2e7d32;}
+.q-feedback.err{color:#c62828;}
+
+/* check button */
+.check-btn{
+  font-family:'Special Elite',monospace;cursor:pointer;border:none;border-radius:4px;
+  padding:8px 18px;font-size:.88em;transition:all .2s;letter-spacing:.5px;
+  background:linear-gradient(135deg,#8b6914,#b8860b);color:#fff;
+  border:2px solid #654321;margin-top:8px;
+}
+.check-btn:hover{background:linear-gradient(135deg,#a07915,#d4a520);transform:translateY(-1px);}
+.check-btn:active{transform:translateY(0);}
+
+/* new exercise button */
+#newExBtn{
+  display:block;width:100%;
+  background:linear-gradient(135deg,#8b5a2b 0%,#654321 100%);
+  border:3px solid #4a3020;border-radius:6px;color:#f4e4c1;
+  font-family:'Special Elite',monospace;font-size:1em;
+  padding:13px 20px;cursor:pointer;letter-spacing:1px;
+  box-shadow:0 4px 10px rgba(0,0,0,.3);transition:all .2s;text-transform:uppercase;
+}
+#newExBtn:hover{background:linear-gradient(135deg,#a0774a,#8b5a2b);transform:translateY(-2px);}
+#newExBtn:active{transform:translateY(0);}
+
+/* units badge */
+.units-badge{
+  display:inline-block;padding:3px 12px;
+  background:rgba(139,90,43,.18);border:1px solid #8b5a2b;border-radius:12px;
+  font-size:.85em;color:#4a3020;margin-left:10px;font-family:'Courier Prime',monospace;
+}
+
+@media(max-width:700px){
+  body{padding:10px;}
+  .container{padding:30px 12px 20px;}
+  h1{font-size:1.5em;}
+  .mode-btn{padding:6px 14px;font-size:.82em;}
+}
+</style>
+</head>
+<body>
+<div class="gear gear1">⚙</div>
+<div class="gear gear2">⚙</div>
+<div class="gear gear3">⚙</div>
+<div class="gear gear4">⚙</div>
+<div id="tooltip"></div>
+
+<div class="container">
+  <div class="rivet rivet-tl"></div><div class="rivet rivet-tr"></div>
+  <div class="rivet rivet-bl"></div><div class="rivet rivet-br"></div>
+  <div class="metal-strip metal-strip-top"></div>
+  <div class="metal-strip metal-strip-bottom"></div>
+
+  <header>
+    <h1>Moto Rettilineo Uniforme</h1>
+    <div class="subtitle">I.C. "C.Puddu", Corso di Fisica - prof. El Basri</div>
+    <div class="subtitle">Analizza il grafico spazio-tempo e rispondi alle domande</div>
+  </header>
+
+  <!-- MODE TOGGLE -->
+  <div class="mode-bar">
+    <span class="mode-icon">🧢</span>
+    <div class="mode-toggle" id="modeToggle">
+      <button class="mode-btn active" data-mode="apprendista">Apprendista</button>
+      <button class="mode-btn" data-mode="operaio">Operaio</button>
+      <button class="mode-btn" data-mode="maestro">Maestro</button>
+    </div>
+    <span class="mode-icon">🎓</span>
+  </div>
+
+  <!-- FORMULA -->
+  <div class="formula" id="formulaBox">s = s₀ + v · t</div>
+
+  <!-- CANVAS -->
+  <div class="canvas-section">
+    <canvas id="graphCanvas" width="860" height="480"></canvas>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-line" style="background:#c0392b;"></div> Oggetto A
+      </div>
+      <div class="legend-item">
+        <div class="legend-line" style="background:#1a6fa8;"></div> Oggetto B
+      </div>
+    </div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div class="questions-section">
+    <h3>📋 Domande</h3>
+    <div id="questionsContainer"></div>
+  </div>
+
+  <button id="newExBtn">🔄 Genera Nuovo Esercizio</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+//  CONSTANTS & STATE
+// ═══════════════════════════════════════════════════════
+const COLORS = { A:'#c0392b', B:'#1a6fa8' };
+const CANVAS_W = 860, CANVAS_H = 480;
+const MARGIN = { left:62, bottom:55, right:28, top:28 };
+const PLOT_W = CANVAS_W - MARGIN.left - MARGIN.right;
+const PLOT_H = CANVAS_H - MARGIN.top - MARGIN.bottom;
+
+const canvas = document.getElementById('graphCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = CANVAS_W; canvas.height = CANVAS_H;
+
+let mode = 'apprendista';
+let ex = null; // current exercise data
+
+// ═══════════════════════════════════════════════════════
+//  COORDINATE HELPERS
+// ═══════════════════════════════════════════════════════
+function toCanvas(gx, gy, scale) {
+  const px = MARGIN.left + (gx / scale.xMax) * PLOT_W;
+  const py = CANVAS_H - MARGIN.bottom - (gy / scale.yMax) * PLOT_H;
+  return [px, py];
+}
+
+// ═══════════════════════════════════════════════════════
+//  EXERCISE GENERATION
+// ═══════════════════════════════════════════════════════
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function rndInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function rndHalf(a,b){
+  // integer or .5 value in [a,b]
+  const choices = [];
+  for(let v=a;v<=b;v+=0.5) choices.push(v);
+  return pick(choices);
+}
+
+// ── helpers for grid-aligned values ──────────────────────
+// In operaio/maestro mode s0 and intersection coords must be
+// multiples of gridStep or half-gridStep (i.e. multiples of gridStep/2).
+function gridAlignedValues(maxVal, gridStep){
+  const half = gridStep / 2;
+  const vals = [];
+  for(let v = 0; v <= maxVal; v += half) vals.push(Math.round(v*100)/100);
+  return vals;
+}
+
+function isGridAligned(val, gridStep){
+  const half = gridStep / 2;
+  return Math.abs(val % half) < 0.01;
+}
+
+function generateExercise() {
+  const useKm = Math.random() < 0.5;
+  const unitT = useKm ? 'h' : 's';
+  const unitS = useKm ? 'km' : 'm';
+
+  const tMax = useKm ? pick([4,6,8,10]) : pick([6,8,10,12]);
+  const sMax = useKm ? pick([60,80,100,120]) : pick([20,30,40,50]);
+
+  // Grid steps
+  const tStep = useKm ? 1 : (tMax<=8?1:2);
+  const sStep = useKm ? Math.max(10, Math.round(sMax/6/10)*10) : (sMax<=30?5:10);
+
+  const doIntersect = Math.random() < 0.5;
+  const strictMode = (mode === 'operaio' || mode === 'maestro');
+
+  if(doIntersect){
+    return generateIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictMode);
+  } else {
+    return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strictMode);
+  }
+}
+
+function generateIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict){
+  const vRange = useKm ? [-20,-15,-10,-5,0,5,10,15,20] : [-4,-3,-2,-1,0,1,2,3,4];
+
+  // Build candidate intersection points respecting grid alignment
+  const tCands = strict ? gridAlignedValues(tMax, tStep).filter(v=>v>0&&v<tMax)
+                        : Array.from({length:tMax-2},(_,i)=>i+1);
+  const sCands = strict ? gridAlignedValues(sMax, sStep).filter(v=>v>0&&v<sMax)
+                        : Array.from({length:sMax-1},(_,i)=>i+1);
+
+  if(!tCands.length || !sCands.length) return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict);
+
+  // Shuffle candidates
+  const tShuf = tCands.slice().sort(()=>Math.random()-.5);
+  const sShuf = sCands.slice().sort(()=>Math.random()-.5);
+
+  for(const tI of tShuf.slice(0,15)){
+    for(const sI of sShuf.slice(0,15)){
+      const vs = vRange.slice().sort(()=>Math.random()-.5);
+      let vA=null, vB=null, s0A, s0B;
+      for(const v of vs){
+        const s0 = sI - v*tI;
+        if(s0 < 0 || s0 > sMax*0.95) continue;
+        // s0 grid alignment check
+        if(strict && !isGridAligned(s0, sStep)) continue;
+        // apprendista: s0 must be integer or .5
+        if(!strict && Math.abs(s0 - Math.round(s0*2)/2) > 0.01) continue;
+        const sEnd = s0 + v*tMax;
+        if(sEnd < -sMax*0.5) continue;
+        if(vA === null){ vA=v; s0A=s0; continue; }
+        if(v !== vA){ vB=v; s0B=s0; break; }
+      }
+      if(vA!==null && vB!==null){
+        return {
+          lineA:{v:vA,s0:s0A}, lineB:{v:vB,s0:s0B},
+          intersection:{t:tI,s:sI},
+          tMax,sMax,unitT,unitS,tStep,sStep,useKm
+        };
+      }
+    }
+  }
+  return generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict);
+}
+
+function generateNonIntersecting(tMax,sMax,unitT,unitS,tStep,sStep,useKm,strict){
+  const vRange = useKm ? [-20,-15,-10,-5,0,5,10,15,20] : [-4,-3,-2,-1,0,1,2,3,4];
+
+  // Build candidate s0 values
+  const s0Cands = strict
+    ? gridAlignedValues(sMax*0.75, sStep)
+    : (() => { const a=[]; for(let v=0;v<=sMax*0.75;v+=0.5) a.push(v); return a; })();
+
+  let lineA, lineB, attempts=0;
+  while(attempts++ < 400){
+    const vA = pick(vRange);
+    const vB = pick(vRange);
+    const s0A = pick(s0Cands);
+    const s0B = pick(s0Cands);
+    if(Math.abs(s0A-s0B)<0.01 && Math.abs(vA-vB)<0.01) continue; // same line
+    if(Math.abs(vA-vB)<0.001){
+      if(Math.abs(s0A-s0B)>0.01){
+        lineA={v:vA,s0:s0A};lineB={v:vB,s0:s0B};break;
+      }
+      continue;
+    }
+    const tInt=(s0B-s0A)/(vA-vB);
+    if(tInt<0||tInt>tMax){
+      const sEndA=s0A+vA*tMax, sEndB=s0B+vB*tMax;
+      if(sEndA>=-sMax*0.1&&sEndA<=sMax*1.1&&sEndB>=-sMax*0.1&&sEndB<=sMax*1.1){
+        lineA={v:vA,s0:s0A};lineB={v:vB,s0:s0B};break;
+      }
+    }
+  }
+  if(!lineA){
+    lineA={v:(useKm?10:2),s0:0};
+    lineB={v:(useKm?5:1),s0:(useKm?20:10)};
+  }
+  return {lineA,lineB,intersection:null,tMax,sMax,unitT,unitS,tStep,sStep,useKm};
+}
+
+// ═══════════════════════════════════════════════════════
+//  DRAWING
+// ═══════════════════════════════════════════════════════
+function drawGraph(exercise) {
+  const {lineA,lineB,intersection,tMax,sMax,unitT,unitS,tStep,sStep} = exercise;
+  const scale = {xMax:tMax, yMax:sMax};
+
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+
+  // Background
+  const bg=ctx.createLinearGradient(0,0,0,CANVAS_H);
+  bg.addColorStop(0,'rgba(255,250,240,.97)');bg.addColorStop(1,'rgba(250,240,220,.97)');
+  ctx.fillStyle=bg;ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+
+  // Grid
+  ctx.save();
+  ctx.strokeStyle='rgba(139,90,43,.18)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+  for(let t=0;t<=tMax;t+=tStep){
+    const [x,]=toCanvas(t,0,scale);const[,y0]=toCanvas(0,0,scale);const[,yT]=toCanvas(0,sMax,scale);
+    ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,yT);ctx.stroke();
+  }
+  for(let s=0;s<=sMax;s+=sStep){
+    const [x0,y]=toCanvas(0,s,scale);const[xT,]=toCanvas(tMax,s,scale);
+    ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(xT,y);ctx.stroke();
+  }
+  ctx.setLineDash([]);ctx.restore();
+
+  // Axes
+  ctx.save();
+  ctx.strokeStyle='#4a3020';ctx.lineWidth=3;ctx.fillStyle='#4a3020';
+  const[ox,oy]=toCanvas(0,0,scale);
+  const[xEnd,]=toCanvas(tMax,0,scale);
+  const[,yEnd]=toCanvas(0,sMax,scale);
+  // X
+  ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(xEnd+12,oy);
+  ctx.lineTo(xEnd+5,oy-5);ctx.moveTo(xEnd+12,oy);ctx.lineTo(xEnd+5,oy+5);ctx.stroke();
+  // Y
+  ctx.beginPath();ctx.moveTo(ox,oy);ctx.lineTo(ox,yEnd-12);
+  ctx.lineTo(ox-5,yEnd-5);ctx.moveTo(ox,yEnd-12);ctx.lineTo(ox+5,yEnd-5);ctx.stroke();
+
+  // Tick labels
+  ctx.fillStyle='#5d4610';ctx.font='12px Courier Prime,monospace';
+  ctx.textAlign='center';
+  for(let t=0;t<=tMax;t+=tStep){
+    if(t===0)continue;
+    const[x,]=toCanvas(t,0,scale);
+    ctx.fillText(t,x,oy+18);
+  }
+  ctx.textAlign='right';
+  for(let s=0;s<=sMax;s+=sStep){
+    if(s===0)continue;
+    const[,y]=toCanvas(0,s,scale);
+    ctx.fillText(s,ox-6,y+4);
+  }
+
+  // Axis names
+  ctx.fillStyle='#4a3020';ctx.font='bold 13px Courier Prime,monospace';
+  ctx.textAlign='center';
+  ctx.fillText(`t (${unitT})`,xEnd+10,oy+32);
+  ctx.save();ctx.translate(ox-42,yEnd+PLOT_H/2);ctx.rotate(-Math.PI/2);
+  ctx.fillText(`s (${unitS})`,0,0);ctx.restore();
+  ctx.fillText('O',ox-10,oy+16);
+  ctx.restore();
+
+  // Draw lines (clipped to canvas area)
+  function drawLine(line, color, label){
+    const {v,s0}=line;
+    // Find t values where s is in [0,sMax]
+    // s=s0+v*t => t=(s-s0)/v
+    let t1=0, t2=tMax;
+    if(Math.abs(v)<0.0001){
+      // horizontal line
+      if(s0<0||s0>sMax) return; // out of view
+    } else {
+      const tAtSmax=(sMax-s0)/v;
+      const tAtS0=(0-s0)/v;
+      const tMin2=Math.min(tAtSmax,tAtS0);
+      const tMax2=Math.max(tAtSmax,tAtS0);
+      t1=Math.max(t1,tMin2);
+      t2=Math.min(t2,tMax2);
+    }
+    if(t1>t2+0.001) return;
+    t1=Math.max(0,t1);t2=Math.min(tMax,t2);
+
+    const s1=s0+v*t1, s2=s0+v*t2;
+    const[px1,py1]=toCanvas(t1,Math.max(0,Math.min(sMax,s1)),scale);
+    const[px2,py2]=toCanvas(t2,Math.max(0,Math.min(sMax,s2)),scale);
+
+    ctx.save();
+    ctx.strokeStyle=color;ctx.lineWidth=3;
+    ctx.shadowColor=color+'88';ctx.shadowBlur=4;
+    ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px2,py2);ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Label position: midpoint, slightly offset
+    const tmid=(t1+t2)*0.5;
+    const smid=s0+v*tmid;
+    const[lx,ly]=toCanvas(tmid,smid,scale);
+
+    ctx.font='bold 13px Courier Prime,monospace';
+    ctx.textAlign='center';
+
+    let labelText='';
+    if(mode==='apprendista'){
+      const vStr=fmtV(v,unitT,unitS);
+      const s0Str=fmtNum(s0);
+      if(Math.abs(s0)<0.001) labelText=`${label}: s=${vStr}·t`;
+      else labelText=`${label}: s=${s0Str}+${vStr}·t`;
+    } else if(mode==='operaio'){
+      labelText=`${label}: v=${fmtV(v,unitT,unitS)}`;
+    } else {
+      labelText=label;
+    }
+
+    // Draw label with white backing
+    const metrics=ctx.measureText(labelText);
+    const lw=metrics.width+10, lh=18;
+    let llx=lx, lly=ly-16;
+    // Keep inside canvas
+    if(llx-lw/2<MARGIN.left) llx=MARGIN.left+lw/2+4;
+    if(llx+lw/2>CANVAS_W-MARGIN.right) llx=CANVAS_W-MARGIN.right-lw/2-4;
+    if(lly<MARGIN.top+4) lly=MARGIN.top+lh+4;
+
+    ctx.fillStyle='rgba(255,248,230,.88)';
+    ctx.fillRect(llx-lw/2,lly-lh+2,lw,lh);
+    ctx.strokeStyle='rgba(139,90,43,.4)';ctx.lineWidth=1;
+    ctx.strokeRect(llx-lw/2,lly-lh+2,lw,lh);
+    ctx.fillStyle=color;
+    ctx.fillText(labelText,llx,lly);
+    ctx.restore();
+  }
+
+  // Determine label offsets so they don't overlap: one above, one below midpoint
+  // Simple: draw A label near 40% of line, B near 70%
+  drawLineWithOffset(lineA,COLORS.A,'A',0.35,scale,-20,exercise);
+  drawLineWithOffset(lineB,COLORS.B,'B',0.65,scale,+20,exercise);
+
+  // Intersection dot
+  if(intersection){
+    const[ix,iy]=toCanvas(intersection.t,intersection.s,scale);
+    ctx.save();
+    ctx.beginPath();ctx.arc(ix,iy,6,0,Math.PI*2);
+    ctx.fillStyle='#654321';ctx.fill();
+    ctx.strokeStyle='#d4a520';ctx.lineWidth=2;ctx.stroke();
+    ctx.restore();
+  }
+}
+
+function drawLineWithOffset(line,color,label,frac,scale,yOff,exercise){
+  const {v,s0}=line;
+  const tMax=scale.xMax, sMax=scale.yMax;
+  const {unitT,unitS}=exercise;
+
+  let t1=0,t2=tMax;
+  if(Math.abs(v)>0.0001){
+    const tAtSmax=(sMax-s0)/v, tAtS0=-s0/v;
+    t1=Math.max(0,Math.min(tAtSmax,tAtS0));
+    t2=Math.min(tMax,Math.max(tAtSmax,tAtS0));
+  } else {
+    if(s0<0||s0>sMax) return;
+  }
+  if(t1>t2+0.001) return;
+  t1=Math.max(0,t1);t2=Math.min(tMax,t2);
+
+  const s1=Math.max(0,Math.min(sMax,s0+v*t1));
+  const s2=Math.max(0,Math.min(sMax,s0+v*t2));
+  const[px1,py1]=toCanvas(t1,s1,scale);
+  const[px2,py2]=toCanvas(t2,s2,scale);
+
+  ctx.save();
+  ctx.strokeStyle=color;ctx.lineWidth=3;
+  ctx.shadowColor=color+'88';ctx.shadowBlur=5;
+  ctx.beginPath();ctx.moveTo(px1,py1);ctx.lineTo(px2,py2);ctx.stroke();
+  ctx.shadowBlur=0;ctx.restore();
+
+  // Label
+  const tmid=t1+(t2-t1)*frac;
+  const smid=Math.max(0,Math.min(sMax,s0+v*tmid));
+  let[lx,ly]=toCanvas(tmid,smid,scale);
+  ly+=yOff;
+
+  let labelText='';
+  if(mode==='apprendista'){
+    const vStr=fmtV(v,unitT,unitS);
+    const s0Str=fmtNum(s0);
+    const vPart = v===0?'0':(v>0?`${vStr}·t`:`(${vStr})·t`);
+    if(Math.abs(s0)<0.001) labelText=`A≡${label}: s=${vPart}`;
+    else labelText=`${label}: s=${s0Str}+(${vStr})·t`;
+    // Cleaner:
+    labelText=buildEqLabel(label,v,s0,unitT,unitS);
+  } else if(mode==='operaio'){
+    const vFormatted=fmtVFull(v,unitT,unitS);
+    labelText=`${label}: v=${vFormatted}`;
+  } else {
+    labelText=`Oggetto ${label}`;
+  }
+
+  ctx.save();
+  ctx.font='bold 12px Courier Prime,monospace';ctx.textAlign='center';
+  const metrics=ctx.measureText(labelText);
+  const lw=metrics.width+12,lh=19;
+  if(lx-lw/2<MARGIN.left+2) lx=MARGIN.left+lw/2+4;
+  if(lx+lw/2>CANVAS_W-MARGIN.right-2) lx=CANVAS_W-MARGIN.right-lw/2-4;
+  if(ly-lh<MARGIN.top+2) ly=MARGIN.top+lh+4;
+  if(ly>CANVAS_H-MARGIN.bottom-4) ly=CANVAS_H-MARGIN.bottom-lh-4;
+
+  ctx.fillStyle='rgba(255,248,230,.9)';
+  roundRect(ctx,lx-lw/2,ly-lh+3,lw,lh,4);ctx.fill();
+  ctx.strokeStyle=color;ctx.lineWidth=1.5;
+  roundRect(ctx,lx-lw/2,ly-lh+3,lw,lh,4);ctx.stroke();
+  ctx.fillStyle=color;
+  ctx.fillText(labelText,lx,ly);
+  ctx.restore();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+
+function buildEqLabel(label,v,s0,unitT,unitS){
+  const vs=fmtVFull(v,unitT,unitS);
+  const s0s=fmtNum(s0);
+  if(Math.abs(s0)<0.001){
+    return `${label}: s=(${vs})·t`;
+  }
+  return `${label}: s=${s0s}+(${vs})·t`;
+}
+
+function fmtNum(n){
+  return (Math.round(n*10)/10).toString().replace('.',',');
+}
+function fmtVFull(v,unitT,unitS){
+  const r=Math.round(v*10)/10;
+  return `${r} ${unitS}/${unitT}`;
+}
+function fmtV(v,unitT,unitS){
+  return `${Math.round(v*10)/10}`;
+}
+
+// ═══════════════════════════════════════════════════════
+//  QUESTION GENERATION
+// ═══════════════════════════════════════════════════════
+function describeMotion(v){
+  if(v>0) return 'allontana';
+  if(v<0) return 'avvicina';
+  return 'è fermo/a';
+}
+
+function generateQuestions(exercise){
+  const {lineA,lineB,intersection,unitT,unitS} = exercise;
+  const allQ = [];
+
+  // Q1: A si allontana/avvicina/è fermo
+  allQ.push({
+    id:'motA',
+    text:'L\'oggetto A si:',
+    type:'radio',
+    options:['allontana','avvicina','è fermo/a'],
+    correct: describeMotion(lineA.v),
+    validate(val){ return val===this.correct; }
+  });
+
+  // Q2: B si allontana/avvicina/è fermo
+  allQ.push({
+    id:'motB',
+    text:'L\'oggetto B si:',
+    type:'radio',
+    options:['allontana','avvicina','è fermo/a'],
+    correct: describeMotion(lineB.v),
+    validate(val){ return val===this.correct; }
+  });
+
+  // Q3: velocità A
+  allQ.push({
+    id:'velA',
+    text:'La velocità dell\'oggetto A è:',
+    type:'radio+number',
+    options:['aumenta','diminuisce','è costante e vale'],
+    correctChoice:'è costante e vale',
+    correctNum: Math.round(Math.abs(lineA.v)*10)/10,
+    unitLabel: `${unitS}/${unitT}`,
+    validate(choice,num){
+      if(choice!==this.correctChoice) return false;
+      return Math.abs((parseFloat(num)||0)-this.correctNum)<0.05;
+    }
+  });
+
+  // Q4: velocità B
+  allQ.push({
+    id:'velB',
+    text:'La velocità dell\'oggetto B è:',
+    type:'radio+number',
+    options:['aumenta','diminuisce','è costante e vale'],
+    correctChoice:'è costante e vale',
+    correctNum: Math.round(Math.abs(lineB.v)*10)/10,
+    unitLabel: `${unitS}/${unitT}`,
+    validate(choice,num){
+      if(choice!==this.correctChoice) return false;
+      return Math.abs((parseFloat(num)||0)-this.correctNum)<0.05;
+    }
+  });
+
+  // Q5/6/7/8: comparison
+  const absA=Math.abs(lineA.v), absB=Math.abs(lineB.v);
+  if(Math.abs(absA-absB)>0.001){
+    const corrComp = absA>absB ? 'superiore a quella di B' : 'inferiore a quella di B';
+    allQ.push({
+      id:'comp',
+      text:'La velocità di A rispetto a quella di B è:',
+      type:'radio',
+      options:['superiore a quella di B','inferiore a quella di B','uguale a quella di B'],
+      correct: corrComp,
+      validate(val){ return val===this.correct; }
+    });
+  } else {
+    allQ.push({
+      id:'comp',
+      text:'La velocità di A rispetto a quella di B è:',
+      type:'radio',
+      options:['superiore a quella di B','inferiore a quella di B','uguale a quella di B'],
+      correct:'uguale a quella di B',
+      validate(val){ return val===this.correct; }
+    });
+  }
+
+  // Q9: intersection
+  allQ.push({
+    id:'meet',
+    text:'Gli oggetti A e B:',
+    type:'meet',
+    intersection,
+    unitT,
+    unitS
+  });
+
+  // Shuffle all questions and pick exactly 3
+  const pool = [...allQ];
+  for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]];}
+
+  // Maestro mode: meet question is mandatory, pick 2 others randomly
+  if(mode==='maestro'){
+    const meetQ = allQ[allQ.length-1];
+    const others = pool.filter(q=>q.id!=='meet');
+    return [meetQ, ...others.slice(0,2)].sort(()=>Math.random()-.5);
+  }
+
+  return pool.slice(0,3);
+}
+
+// ═══════════════════════════════════════════════════════
+//  RENDER QUESTIONS
+// ═══════════════════════════════════════════════════════
+function renderQuestions(questions){
+  const container=document.getElementById('questionsContainer');
+  container.innerHTML='';
+  questions.forEach((q,qi)=>{
+    const block=document.createElement('div');
+    block.className='question-block';
+    block.id=`qblock-${qi}`;
+
+    const qText=document.createElement('div');
+    qText.className='question-text';
+    qText.textContent=`${qi+1}. ${q.text}`;
+    block.appendChild(qText);
+
+    if(q.type==='radio'){
+      const rg=document.createElement('div');rg.className='radio-group';
+      q.options.forEach(opt=>{
+        const lbl=document.createElement('label');lbl.className='radio-label';
+        lbl.innerHTML=`<input type="radio" name="q${qi}" value="${opt}">${opt}`;
+        lbl.addEventListener('click',()=>{
+          rg.querySelectorAll('.radio-label').forEach(l=>l.classList.remove('selected'));
+          lbl.classList.add('selected');
+        });
+        rg.appendChild(lbl);
+      });
+      block.appendChild(rg);
+      const btn=makeCheckBtn(()=>checkRadio(qi,q,rg));
+      block.appendChild(btn);
+
+    } else if(q.type==='radio+number'){
+      const rg=document.createElement('div');rg.className='radio-group';
+      q.options.forEach(opt=>{
+        const lbl=document.createElement('label');lbl.className='radio-label';
+        if(opt==='è costante e vale'){
+          const inp=document.createElement('input');
+          inp.type='number';inp.step='0.1';inp.className='inline-input';
+          inp.placeholder='valore';inp.id=`num-${qi}`;inp.style.width='80px';inp.style.marginLeft='6px';
+          lbl.innerHTML=`<input type="radio" name="q${qi}" value="${opt}">${opt}`;
+          lbl.appendChild(inp);
+        } else {
+          lbl.innerHTML=`<input type="radio" name="q${qi}" value="${opt}">${opt}`;
+        }
+        lbl.addEventListener('click',()=>{
+          rg.querySelectorAll('.radio-label').forEach(l=>l.classList.remove('selected'));
+          lbl.classList.add('selected');
+        });
+        rg.appendChild(lbl);
+      });
+      const unitSpan=document.createElement('span');
+      unitSpan.style.cssText='font-size:.85em;color:#6d4a2a;margin-left:4px;';
+      unitSpan.textContent=q.unitLabel;
+      block.appendChild(rg);
+      block.appendChild(unitSpan);
+      const btn=makeCheckBtn(()=>checkRadioNum(qi,q,rg));
+      block.appendChild(btn);
+
+    } else if(q.type==='meet'){
+      renderMeetQuestion(block,qi,q);
+    }
+
+    const fb=document.createElement('div');fb.className='q-feedback';fb.id=`fb-${qi}`;
+    block.appendChild(fb);
+    container.appendChild(block);
+  });
+}
+
+function renderMeetQuestion(block,qi,q){
+  const rg=document.createElement('div');rg.className='radio-group';
+  ['non si incontrano','si incontrano'].forEach(opt=>{
+    const lbl=document.createElement('label');lbl.className='radio-label';
+    lbl.innerHTML=`<input type="radio" name="q${qi}" value="${opt}">${opt}`;
+    lbl.addEventListener('click',()=>{
+      rg.querySelectorAll('.radio-label').forEach(l=>l.classList.remove('selected'));
+      lbl.classList.add('selected');
+      subQ.classList.toggle('visible',opt==='si incontrano');
+    });
+    rg.appendChild(lbl);
+  });
+  block.appendChild(rg);
+
+  const subQ=document.createElement('div');subQ.className='sub-question';
+  subQ.innerHTML=`<strong>In quale punto si incontrano?</strong>`;
+  const row=document.createElement('div');row.className='sub-q-row';
+  row.innerHTML=`
+    <label>t =</label>
+    <input type="number" step="0.5" class="inline-input" id="meet-t-${qi}" placeholder="es. 3"> <span style="font-size:.85em;color:#6d4a2a;">${q.unitT}</span>
+    <label style="margin-left:10px;">s =</label>
+    <input type="number" step="0.5" class="inline-input" id="meet-s-${qi}" placeholder="es. 15"> <span style="font-size:.85em;color:#6d4a2a;">${q.unitS}</span>
+  `;
+  subQ.appendChild(row);
+  block.appendChild(subQ);
+
+  const btn=makeCheckBtn(()=>checkMeet(qi,q,rg,subQ));
+  block.appendChild(btn);
+}
+
+function makeCheckBtn(onclick){
+  const btn=document.createElement('button');
+  btn.className='check-btn';btn.textContent='✔ Verifica';
+  btn.addEventListener('click',onclick);
+  return btn;
+}
+
+// ═══════════════════════════════════════════════════════
+//  CHECK FUNCTIONS
+// ═══════════════════════════════════════════════════════
+function getFeedback(qi){ return document.getElementById(`fb-${qi}`); }
+
+function checkRadio(qi,q,rg){
+  const sel=rg.querySelector('.radio-label.selected');
+  const fb=getFeedback(qi);
+  if(!sel){fb.className='q-feedback err';fb.textContent='Seleziona una risposta prima di verificare.';return;}
+  const val=sel.querySelector('input').value;
+  if(q.validate(val)){
+    sel.classList.add('correct');
+    fb.className='q-feedback ok';fb.textContent='✓ Corretto!';
+  } else {
+    sel.classList.add('incorrect');
+    fb.className='q-feedback err';fb.textContent='✗ Non è corretto. Analizza meglio il grafico e riprova!';
+    setTimeout(()=>{sel.classList.remove('incorrect','selected');fb.textContent='';},1800);
+  }
+}
+
+function checkRadioNum(qi,q,rg){
+  const sel=rg.querySelector('.radio-label.selected');
+  const fb=getFeedback(qi);
+  if(!sel){fb.className='q-feedback err';fb.textContent='Seleziona una risposta prima di verificare.';return;}
+  const choice=sel.querySelector('input[type=radio]').value;
+  const numInp=document.getElementById(`num-${qi}`);
+  const num=numInp?numInp.value:'';
+  if(q.validate(choice,num)){
+    sel.classList.add('correct');
+    if(numInp) numInp.classList.add('correct');
+    fb.className='q-feedback ok';fb.textContent='✓ Corretto!';
+  } else {
+    sel.classList.add('incorrect');
+    if(numInp&&choice==='è costante e vale') numInp.classList.add('incorrect');
+    fb.className='q-feedback err';fb.textContent='✗ Non è corretto. Ricontrolla la pendenza della retta e riprova!';
+    setTimeout(()=>{
+      sel.classList.remove('incorrect','selected');
+      if(numInp){numInp.classList.remove('incorrect');numInp.value='';}
+      fb.textContent='';
+    },1800);
+  }
+}
+
+function checkMeet(qi,q,rg,subQ){
+  const fb=getFeedback(qi);
+  const sel=rg.querySelector('.radio-label.selected');
+  if(!sel){fb.className='q-feedback err';fb.textContent='Seleziona una risposta prima di verificare.';return;}
+  const choice=sel.querySelector('input').value;
+  const doMeet=choice==='si incontrano';
+  const actuallyMeet=q.intersection!==null;
+
+  if(doMeet!==actuallyMeet){
+    sel.classList.add('incorrect');
+    fb.className='q-feedback err';fb.textContent='✗ Non è corretto. Osserva attentamente le rette e riprova!';
+    setTimeout(()=>{sel.classList.remove('incorrect','selected');fb.textContent='';},1800);
+    return;
+  }
+
+  if(!doMeet){
+    sel.classList.add('correct');
+    fb.className='q-feedback ok';fb.textContent='✓ Corretto! Le rette non si incontrano nel dominio visibile.';
+    return;
+  }
+
+  // Check coordinates
+  const tIn=parseFloat(document.getElementById(`meet-t-${qi}`)?.value||'');
+  const sIn=parseFloat(document.getElementById(`meet-s-${qi}`)?.value||'');
+  if(isNaN(tIn)||isNaN(sIn)){
+    fb.className='q-feedback err';fb.textContent='Inserisci le coordinate del punto di incontro.';return;
+  }
+  const tOk=Math.abs(tIn-q.intersection.t)<0.05;
+  const sOk=Math.abs(sIn-q.intersection.s)<0.05;
+  if(tOk&&sOk){
+    sel.classList.add('correct');
+    fb.className='q-feedback ok';fb.textContent=`✓ Corretto! Si incontrano in (t=${q.intersection.t} ${q.unitT}; s=${q.intersection.s} ${q.unitS}).`;
+  } else {
+    fb.className='q-feedback err';fb.textContent='✗ Le coordinate del punto di incontro non sono corrette. Riprova!';
+    const ti=document.getElementById(`meet-t-${qi}`);
+    const si=document.getElementById(`meet-s-${qi}`);
+    if(ti){ti.classList.add('incorrect');setTimeout(()=>{ti.classList.remove('incorrect');ti.value='';},1800);}
+    if(si){si.classList.add('incorrect');setTimeout(()=>{si.classList.remove('incorrect');si.value='';},1800);}
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+//  TOOLTIP (Apprendista mode only)
+// ═══════════════════════════════════════════════════════
+const tooltip=document.getElementById('tooltip');
+
+canvas.addEventListener('mousemove',e=>{
+  if(mode!=='apprendista'){tooltip.style.display='none';return;}
+  if(!ex) return;
+  const rect=canvas.getBoundingClientRect();
+  const scX=CANVAS_W/rect.width, scY=CANVAS_H/rect.height;
+  const cx=(e.clientX-rect.left)*scX;
+  const cy=(e.clientY-rect.top)*scY;
+  const scale={xMax:ex.tMax,yMax:ex.sMax};
+  const gt=((cx-MARGIN.left)/PLOT_W)*ex.tMax;
+  const gs=((CANVAS_H-MARGIN.bottom-cy)/PLOT_H)*ex.sMax;
+  if(gt<-0.2||gt>ex.tMax+0.2||gs<-0.2||gs>ex.sMax+0.2){tooltip.style.display='none';return;}
+  // check proximity to lines
+  const hit=getLineHit(cx,cy,scale);
+  if(hit){
+    const t=Math.round(gt*2)/2;
+    const s=Math.round(gs*2)/2;
+    tooltip.style.display='block';
+    tooltip.style.left=(e.clientX+14)+'px';
+    tooltip.style.top=(e.clientY-8)+'px';
+    tooltip.textContent=`${hit} → (t=${fmtNum(t)} ; s=${fmtNum(s)})`;
+  } else {
+    tooltip.style.display='none';
+  }
+});
+canvas.addEventListener('mouseleave',()=>tooltip.style.display='none');
+
+function getLineHit(cx,cy,scale){
+  if(!ex) return null;
+  const tol=12;
+  for(const[line,lbl] of [[ex.lineA,'A'],[ex.lineB,'B']]){
+    // distance from point to line on canvas
+    const {v,s0}=line;
+    // Line: s=s0+v*t; in canvas coords: two points
+    const [px1,py1]=toCanvas(0,Math.max(0,Math.min(ex.sMax,s0)),scale);
+    const [px2,py2]=toCanvas(ex.tMax,Math.max(0,Math.min(ex.sMax,s0+v*ex.tMax)),scale);
+    const dx=px2-px1,dy=py2-py1;
+    const len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1) continue;
+    const dist=Math.abs((cy-py1)*dx-(cx-px1)*dy)/len;
+    if(dist<tol) return `Retta ${lbl}`;
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════════════════
+//  MAIN INIT & EVENTS
+// ═══════════════════════════════════════════════════════
+function newExercise(){
+  ex=generateExercise();
+  const qs=generateQuestions(ex);
+  drawGraph(ex);
+  renderQuestions(qs);
+  // Update formula
+  document.getElementById('formulaBox').textContent=`s = s₀ + v · t   (${ex.unitS}, ${ex.unitT})`;
+}
+
+// Mode toggle
+document.querySelectorAll('.mode-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    mode=btn.dataset.mode;
+    newExercise();
+  });
+});
+
+document.getElementById('newExBtn').addEventListener('click',newExercise);
+
+// Start
+newExercise();
+</script>
+</body>
+</html>
