@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Moto Rettilineo Uniforme – bonus</title>
+<title>Moto Rettilineo Uniforme</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:wght@400;700&family=IM+Fell+English:ital@0;1&display=swap');
 
@@ -217,18 +217,19 @@ h1::after{content:' ⚙';font-style:normal;color:#8b5a2b;}
 
   <header>
     <h1>Moto Rettilineo Uniforme</h1>
+    <div class="subtitle">I.C. "C.Puddu", Corso di Fisica - prof. El Basri</div>
     <div class="subtitle">Analizza il grafico spazio-tempo e rispondi alle domande</div>
   </header>
 
   <!-- MODE TOGGLE -->
   <div class="mode-bar">
-    <span class="mode-icon">🔧</span>
+    <span class="mode-icon">⚙️</span>
     <div class="mode-toggle" id="modeToggle">
-      <button class="mode-btn active" data-mode="apprendista">Apprendista</button>
-      <button class="mode-btn" data-mode="operaio">Operaio</button>
-      <button class="mode-btn" data-mode="maestro">Maestro</button>
+      <button class="mode-btn active" data-mode="apprendista">🧢Apprendista</button>
+      <button class="mode-btn" data-mode="operaio">🔧Operaio</button>
+      <button class="mode-btn" data-mode="maestro">🎓Maestro</button>
     </div>
-    <span class="mode-icon">💧</span>
+    <span class="mode-icon">⚙️</span>
   </div>
 
   <!-- FORMULA -->
@@ -602,11 +603,14 @@ function drawLineWithOffset(line,color,label,frac,scale,yOff,exercise){
     labelText=buildEqLabel(label,v,s0,unitT,unitS);
   } else if(mode==='operaio'){
     // operaio = old maestro: just the object name
-    labelText=`Oggetto ${label}`;
-  } else {
-    // maestro: show velocity
+    //labelText=`Oggetto ${label}`;
     const vFormatted=fmtVFull(v,unitT,unitS);
     labelText=`${label}: v=${vFormatted}`;
+  } else {
+    // maestro: show velocity
+    //const vFormatted=fmtVFull(v,unitT,unitS);
+    //labelText=`${label}: v=${vFormatted}`;
+    labelText=`Oggetto ${label}`;
   }
 
   ctx.save();
